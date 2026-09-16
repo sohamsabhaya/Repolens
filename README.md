@@ -58,30 +58,30 @@ RepoLens models the codebase intelligence, retrieval, and reasoning process as a
 
 ```mermaid
 flowchart TD
-    Start([Start / User Query]) --> route_query[route_query: Classify Query Intent\nCode RAG vs Git History vs Structure Tree]
+    Start(["Start / User Query"]) --> route_query["route_query: Classify Query Intent<br/>Code RAG vs Git History vs Structure Tree"]
     
-    route_query -->|intent: tree| get_file_tree[get_file_tree: Deterministic Zero-Hallucination\nDirectory & Symbol Tree]
-    route_query -->|intent: commit_history| get_git_history[get_git_history: Extract Commit DAG,\nAuthors & Diff Patches]
-    route_query -->|intent: code_rag| retrieve_docs[retrieve_docs: Dense Vector Retrieval\nAST Chunks & Symbol Metadata]
+    route_query -->|"intent: tree"| get_file_tree["get_file_tree: Deterministic Zero-Hallucination<br/>Directory & Symbol Tree"]
+    route_query -->|"intent: commit_history"| get_git_history["get_git_history: Extract Commit DAG,<br/>Authors & Diff Patches"]
+    route_query -->|"intent: code_rag"| retrieve_docs["retrieve_docs: Dense Vector Retrieval<br/>AST Chunks & Symbol Metadata"]
     
-    retrieve_docs --> grade_documents[grade_documents: CampusX CRAG Evaluator\nScore Relevance Confidence]
+    retrieve_docs --> grade_documents["grade_documents: CampusX CRAG Evaluator<br/>Score Relevance Confidence"]
     
-    grade_documents -->|confidence >= 0.7| knowledge_filter[knowledge_filter: Decompose & Filter\nRelevant Knowledge Strips]
-    grade_documents -->|0.3 <= confidence < 0.7| detect_ambiguity[detect_ambiguity: Evaluate Symbol Ambiguity]
-    grade_documents -->|confidence < 0.3| web_search_fallback[web_search_fallback: External Docs\n& Web Search Fallback]
+    grade_documents -->|"confidence >= 0.7"| knowledge_filter["knowledge_filter: Decompose & Filter<br/>Relevant Knowledge Strips"]
+    grade_documents -->|"0.3 <= confidence < 0.7"| detect_ambiguity["detect_ambiguity: Evaluate Symbol Ambiguity"]
+    grade_documents -->|"confidence < 0.3"| web_search_fallback["web_search_fallback: External Docs<br/>& Web Search Fallback"]
     
-    detect_ambiguity -->|ambiguous candidates| hitl_interrupt[hitl_interrupt: LangGraph interrupt()\nPrompt User Disambiguation]
-    detect_ambiguity -->|single match| query_rewrite[query_rewrite: Reformulate Query\n& Expand Synonyms]
+    detect_ambiguity -->|"ambiguous candidates"| hitl_interrupt["hitl_interrupt: LangGraph interrupt()<br/>Prompt User Disambiguation"]
+    detect_ambiguity -->|"single match"| query_rewrite["query_rewrite: Reformulate Query<br/>& Expand Synonyms"]
     
     query_rewrite --> retrieve_docs
-    hitl_interrupt -->|Command resume| knowledge_filter
+    hitl_interrupt -->|"Command resume"| knowledge_filter
     
-    knowledge_filter --> generate_answer[generate_answer: Groq Llama 3.3 Reasoning\nSynthesize Grounded Answer & Citations]
-    get_file_tree --> format_response[format_response: Format Tree / DAG Output]
+    knowledge_filter --> generate_answer["generate_answer: Groq Llama 3.3 Reasoning<br/>Synthesize Grounded Answer & Citations"]
+    get_file_tree --> format_response["format_response: Format Tree / DAG Output"]
     get_git_history --> generate_answer
     web_search_fallback --> generate_answer
     
-    generate_answer --> End([End / Return Streamed Answer & Citations])
+    generate_answer --> End(["End / Return Streamed Answer & Citations"])
     format_response --> End
 ```
 
@@ -104,19 +104,19 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    RetrievedContext([Retrieved AST Chunks]) --> EvaluatorNode[evaluate_retrieval: Calculate Confidence Score]
+    RetrievedContext(["Retrieved AST Chunks"]) --> EvaluatorNode["evaluate_retrieval: Calculate Confidence Score"]
     
-    EvaluatorNode --> DecisionNode{Confidence Grade}
+    EvaluatorNode --> DecisionNode{"Confidence Grade"}
     
-    DecisionNode -->|Score >= 0.7 Correct| DirectSynthesis[High Confidence Pass\nExtract Knowledge Strips]
-    DecisionNode -->|0.3 <= Score < 0.7 Ambiguous| AmbiguityFlow[Refinement Pass\nQuery Rewrite & HITL Check]
-    DecisionNode -->|Score < 0.3 Incorrect| FallbackFlow[Web Search Fallback\nDuckDuckGo / DDGS Search]
+    DecisionNode -->|"Score >= 0.7 (Correct)"| DirectSynthesis["High Confidence Pass<br/>Extract Knowledge Strips"]
+    DecisionNode -->|"0.3 <= Score < 0.7 (Ambiguous)"| AmbiguityFlow["Refinement Pass<br/>Query Rewrite & HITL Check"]
+    DecisionNode -->|"Score < 0.3 (Incorrect)"| FallbackFlow["Web Search Fallback<br/>DuckDuckGo / DDGS Search"]
     
-    DirectSynthesis --> GroundedGen[Grounded Answer Generator]
+    DirectSynthesis --> GroundedGen["Grounded Answer Generator"]
     AmbiguityFlow --> GroundedGen
     FallbackFlow --> GroundedGen
     
-    GroundedGen --> FinalAnswer([Verified Answer with Citations])
+    GroundedGen --> FinalAnswer(["Verified Answer with Citations"])
 ```
 
 ---
@@ -125,11 +125,11 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    Turn1[Checkpoint 1\nThread UUID] --> Turn2[Checkpoint 2\nAST Ingested]
-    Turn2 --> Turn3[Checkpoint 3\nQuery 1]
-    Turn3 --> Turn4[Checkpoint 4\nQuery 2]
-    Turn4 -.->|Time-Travel Rewind| Turn2
-    Turn2 --> ForkedTurn[Forked Branch\nAlternative Reasoning Path]
+    Turn1["Checkpoint 1<br/>Thread UUID"] --> Turn2["Checkpoint 2<br/>AST Ingested"]
+    Turn2 --> Turn3["Checkpoint 3<br/>Query 1"]
+    Turn3 --> Turn4["Checkpoint 4<br/>Query 2"]
+    Turn4 -.->|"Time-Travel Rewind"| Turn2
+    Turn2 --> ForkedTurn["Forked Branch<br/>Alternative Reasoning Path"]
 ```
 
 ---
