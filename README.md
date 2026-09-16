@@ -7,7 +7,6 @@
 [![Groq](https://img.shields.io/badge/Groq-Llama_3.3_%26_Qwen-F55036.svg?style=for-the-badge)](https://groq.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20%2F%2018-4169E1.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 **An enterprise-grade, multi-turn AI codebase intelligence studio built with LangGraph, FastAPI, and a light-themed Web UI that parses multi-language AST syntax trees, indexes Git commit & diff evolution, performs CampusX Corrective RAG (CRAG) with confidence thresholds, and enables Human-in-the-Loop query disambiguation and state time-travel.**
 
@@ -295,9 +294,3 @@ test_09_crag_thresholds ... ok
 ----------------------------------------------------------------------
 Ran 9 tests in 2.28s - OK (100% Pass Rate)
 ```
-
----
-
-## 📄 License
-
-Distributed under the **MIT License**. See `LICENSE` for more information.
