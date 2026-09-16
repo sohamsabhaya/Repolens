@@ -1,5 +1,5 @@
 """
-Ingestion Pipeline - Repository Cloning & Parallel File Processing
+Ingestion Pipeline - Repository Cloning, Git History Extraction & Parallel File Processing
 """
 
 import os
@@ -19,6 +19,7 @@ from src.config import (
     DEFAULT_MAX_WORKERS,
 )
 from src.ingestion.code_parser import UniversalCodeChunker
+from src.ingestion.git_parser import GitHistoryExtractor
 
 
 def get_repo_cache_dir(repo_source: str, base_cache_dir: Optional[Path] = None) -> Path:
@@ -52,8 +53,15 @@ def clone_or_load_repo(repo_source: str, target_dir: Optional[Path] = None) -> P
         return local_path
 
 
-def parallel_scan_and_chunk(repo_path: Path, max_workers: int = DEFAULT_MAX_WORKERS) -> List[Document]:
-    """Walks the repository and chunks files concurrently using ThreadPoolExecutor."""
+def parallel_scan_and_chunk(
+    repo_path: Path,
+    include_git_history: bool = True,
+    max_commits: int = 50,
+    max_workers: int = DEFAULT_MAX_WORKERS
+) -> List[Document]:
+    """
+    Walks the repository, chunks source files concurrently, and extracts Git history / diffs.
+    """
     candidate_files: List[Path] = []
     
     for root, dirs, files in os.walk(repo_path):
@@ -74,7 +82,15 @@ def parallel_scan_and_chunk(repo_path: Path, max_workers: int = DEFAULT_MAX_WORK
             if res:
                 all_documents.extend(res)
 
-    print(f"[PARSING COMPLETE] Generated {len(all_documents)} semantic chunks.")
+    print(f"[PARSING COMPLETE] Generated {len(all_documents)} semantic code chunks.")
+
+    # Ingest Git Commit History & Diffs (Stage 2)
+    if include_git_history:
+        print(f"[GIT INGESTION] Extracting up to {max_commits} commits with diffs...")
+        commit_docs = GitHistoryExtractor.extract_commits(repo_path, max_commits=max_commits)
+        all_documents.extend(commit_docs)
+        print(f"[GIT COMPLETE] Added {len(commit_docs)} commit history records.")
+
     if not all_documents:
         raise ValueError(f"No parseable code or configuration files found in {repo_path}!")
 

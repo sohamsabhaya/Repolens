@@ -1,5 +1,5 @@
 """
-State Definitions & Schemas for LangGraph Agent
+State Definitions & Schemas for LangGraph Agent (Stage 3)
 """
 
 from typing import List, Optional, TypedDict
@@ -14,6 +14,8 @@ class Citation(BaseModel):
 
 class AgentState(TypedDict):
     question: str
+    route: Optional[str]
     retrieved_docs: List[Document]
+    tree_context: Optional[str]
     answer: str
     citations: List[str]

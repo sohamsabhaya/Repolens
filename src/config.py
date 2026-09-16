@@ -17,6 +17,7 @@ if not GROQ_API_KEY:
 PRIMARY_LLM_MODEL = os.getenv("PRIMARY_LLM_MODEL", "qwen/qwen3.8-27b")
 FAST_LLM_MODEL = os.getenv("FAST_LLM_MODEL", "qwen/qwen3.8-27b")
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "sentence-transformers/all-MiniLM-L6-v2")
+DEFAULT_EMBEDDING_MODEL = EMBEDDING_MODEL_NAME
 
 # Directories & Caching
 BASE_DIR = Path(__file__).resolve().parent.parent

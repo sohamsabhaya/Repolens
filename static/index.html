@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RepoLens — Codebase Intelligence & Git History Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    :root {
+      --bg: #FAFAF8;
+      --card-bg: #FFFFFF;
+      --card-hover: #F4F5F7;
+      --ink: #16181D;
+      --ink-soft: #565B66;
+      --ink-muted: #8A8F99;
+      --line: #E2E4E8;
+      --line-strong: #C9CCD3;
+      --accent: #0F172A;
+      --accent-hover: #000000;
+      --accent-blue: #0284C7;
+      --accent-blue-bg: #F0F9FF;
+      --accent-green: #16A34A;
+      --accent-green-bg: #F0FDF4;
+      --accent-red: #DC2626;
+      --accent-red-bg: #FEF2F2;
+      --accent-amber: #D97706;
+      --accent-amber-bg: #FFFBEB;
+      --add-bg: #EAF5EE;
+      --add-ink: #1E5B3A;
+      --del-bg: #FBEBEA;
+      --del-ink: #8C2E27;
+      --radius: 6px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 36px 20px 80px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--accent-blue-bg);
+      color: var(--accent-blue);
+      border: 1px solid #BAE6FD;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .header-status {
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      display: inline-block;
+    }
+
+    /* Hero Banner Collapsible */
+    .banner-wrapper {
+      margin-bottom: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .banner-header {
+      padding: 10px 16px;
+      background: #F8F9FA;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .banner-content img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Ingestion Box */
+    .ingest-box {
+      background: var(--card-bg);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ingest-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    input[type=text] {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #FFFFFF;
+      color: var(--ink);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13.5px;
+      transition: border-color 0.15s ease;
+    }
+
+    input[type=text]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button.btn-primary {
+      padding: 10px 22px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #FFFFFF;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+    }
+
+    button.btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    button.btn-secondary {
+      padding: 7px 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #FFFFFF;
+      color: var(--ink);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    button.btn-secondary:hover {
+      background: var(--card-hover);
+      border-color: var(--ink-soft);
+    }
+
+    .chips-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    .chip-btn {
+      background: #F1F3F5;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11.5px;
+      cursor: pointer;
+      color: var(--ink-soft);
+    }
+
+    .chip-btn:hover {
+      background: #E5E7EB;
+      color: var(--ink);
+    }
+
+    .status-msg {
+      font-size: 13px;
+      color: var(--ink-soft);
+      margin-top: 10px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Metric Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .metric-value {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    /* Language Distribution Bar */
+    .lang-bar-container {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .lang-bar-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+
+    .lang-progress {
+      display: flex;
+      width: 100%;
+      height: 9px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      background: #E5E7EB;
+    }
+
+    .lang-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      font-size: 12.5px;
+    }
+
+    .lang-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .lang-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--line-strong);
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: -1px;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--ink);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Tab 1: Chat UI */
+    .chat-container {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chat-bubble {
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 92%;
+    }
+
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: #FFFFFF;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-bubble.assistant {
+      align-self: flex-start;
+      background: #F8F9FA;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      border-bottom-left-radius: 2px;
+    }
+
+    .chat-bubble.assistant p { margin: 0 0 10px; }
+    .chat-bubble.assistant p:last-child { margin-bottom: 0; }
+    .chat-bubble.assistant ul, .chat-bubble.assistant ol { margin: 0 0 10px; padding-left: 20px; }
+
+    .chat-citations {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .cit-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      background: var(--accent-blue-bg);
+      color: var(--accent-blue);
+      border: 1px solid #BAE6FD;
+      padding: 2px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .chat-input-area {
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+      background: #FFFFFF;
+      display: flex;
+      gap: 10px;
+    }
+
+    .quick-prompts {
+      padding: 10px 20px;
+      background: #F8F9FA;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .quick-chip {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: #FFFFFF;
+      border: 1px solid var(--line-strong);
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .quick-chip:hover {
+      background: var(--ink);
+      color: #FFFFFF;
+      border-color: var(--ink);
+    }
+
+    /* Tab 2: Overview / README */
+    .overview-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+
+    .overview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .notice-banner {
+      background: var(--accent-blue-bg);
+      border: 1px solid #BAE6FD;
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: #0369A1;
+    }
+
+    .markdown-body {
+      font-size: 14.5px;
+      line-height: 1.65;
+    }
+
+    .markdown-body h1 { font-size: 20px; border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-top: 20px; }
+    .markdown-body h2 { font-size: 17px; border-bottom: 1px solid var(--line); padding-bottom: 4px; margin-top: 18px; }
+    .markdown-body h3 { font-size: 15px; margin-top: 14px; }
+    .markdown-body pre { background: #F8F9FA; border: 1px solid var(--line); padding: 12px; border-radius: var(--radius); overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+    .markdown-body code { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; background: #F1F3F5; padding: 2px 5px; border-radius: 3px; }
+    .markdown-body pre code { background: transparent; padding: 0; }
+
+    /* Tab 3: Codebase Explorer */
+    .explorer-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+    }
+
+    .explorer-sidebar {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      height: 650px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .explorer-filelist {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .file-item {
+      padding: 7px 10px;
+      border-radius: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.15s ease;
+    }
+
+    .file-item:hover {
+      background: var(--card-hover);
+      color: var(--ink);
+    }
+
+    .file-item.active {
+      background: #F1F5F9;
+      color: var(--accent);
+      font-weight: 600;
+      border-left: 3px solid var(--accent);
+    }
+
+    .explorer-viewer {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      height: 650px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      overflow-y: auto;
+    }
+
+    .viewer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .copilot-bar {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .copilot-response-box {
+      background: var(--accent-blue-bg);
+      border: 1px solid #BAE6FD;
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-top: 10px;
+      font-size: 13.5px;
+      display: none;
+    }
+
+    /* Tab 4: Git Studio */
+    .git-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+    }
+
+    .git-sidebar {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      height: 650px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .commit-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: #FFFFFF;
+    }
+
+    .commit-card:hover {
+      background: var(--card-hover);
+      border-color: var(--line-strong);
+    }
+
+    .commit-card.active {
+      border-color: var(--accent);
+      background: #F8FAFC;
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .commit-sha-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      background: #F1F5F9;
+      color: #334155;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .git-viewer {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      height: 650px;
+      overflow-y: auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .diff-block {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: #FFFFFF;
+    }
+
+    .diff-header {
+      background: #F8F9FA;
+      padding: 8px 14px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .diff-body pre {
+      margin: 0;
+      padding: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.5;
+      overflow-x: auto;
+      background: #FFFFFF;
+    }
+
+    .stat-add { color: var(--add-ink); font-weight: 600; }
+    .stat-del { color: var(--del-ink); font-weight: 600; }
+
+    /* Spinner */
+    .spinner {
+      border: 2px solid #E5E7EB;
+      border-top: 2px solid var(--accent);
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header>
+    <div>
+      <div class="brand-title">
+        ⚡ RepoLens
+        <span class="brand-badge">Agentic Codebase Intelligence</span>
+      </div>
+      <div style="font-size: 13px; color: var(--ink-soft); margin-top: 2px;">
+        AST Codebase Intelligence, Git History & Autonomous Architecture Studio
+      </div>
+    </div>
+    <div class="header-status">
+      <span class="status-dot"></span>
+      <span id="persistence-label">PostgreSQL 18 Connected</span>
+    </div>
+  </header>
+
+  <!-- Hero Architecture Banner (Collapsible) -->
+  <div class="banner-wrapper">
+    <div class="banner-header" onclick="toggleBanner()">
+      <span>🖼️ Visual Architecture Map & System Engine</span>
+      <span id="banner-toggle-icon">▲ Collapse</span>
+    </div>
+    <div class="banner-content" id="banner-content">
+      <img src="/static/banner.png" alt="RepoLens Codebase Intelligence Architecture">
+    </div>
+  </div>
+
+  <!-- Ingestion Bar -->
+  <div class="ingest-box">
+    <div class="ingest-title">📂 Target Repository Ingestion</div>
+    <div class="input-row">
+      <input type="text" id="repo-url-input" value="." placeholder="Enter GitHub repository URL or local folder path...">
+      <button class="btn-primary" id="btn-ingest" onclick="ingestRepository()">
+        <span id="ingest-spinner" class="spinner" style="display:none;"></span>
+        <span>🚀 Ingest & Analyze</span>
+      </button>
+    </div>
+    <div class="chips-row">
+      <span>Quick Repos:</span>
+      <button class="chip-btn" onclick="setRepoInput('.')">Current Local Repo</button>
+      <button class="chip-btn" onclick="setRepoInput('https://github.com/psf/requests')">psf/requests</button>
+      <button class="chip-btn" onclick="setRepoInput('https://github.com/fastapi/fastapi')">fastapi/fastapi</button>
+    </div>
+    <div class="status-msg" id="ingest-status"></div>
+  </div>
+
+  <!-- Metrics Summary -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-value" id="stat-files">0</div>
+      <div class="metric-label">Source Files</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" id="stat-commits">0</div>
+      <div class="metric-label">Git Commits</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" id="stat-lang" style="color: var(--accent-blue);">Python</div>
+      <div class="metric-label">Primary Language</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value" id="stat-lines" style="color: var(--accent-green);">0</div>
+      <div class="metric-label">Total Code Lines</div>
+    </div>
+  </div>
+
+  <!-- Visual Language Bar -->
+  <div class="lang-bar-container">
+    <div class="lang-bar-title">📊 Repository Language Breakdown</div>
+    <div class="lang-progress" id="lang-progress-bar"></div>
+    <div class="lang-legend" id="lang-legend"></div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('tab-chat')">💬 AI Code Copilot</button>
+    <button class="tab-btn" onclick="switchTab('tab-overview')">📖 Project Overview & README</button>
+    <button class="tab-btn" onclick="switchTab('tab-explorer')">🌲 Codebase Explorer</button>
+    <button class="tab-btn" onclick="switchTab('tab-git')">📜 Git Evolution & Diff Studio</button>
+  </div>
+
+  <!-- Tab 1: AI Code Copilot -->
+  <div class="tab-panel active" id="tab-chat">
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-msg-list">
+        <div class="chat-bubble assistant">
+          <p><b>👋 Welcome to RepoLens Studio!</b></p>
+          <p>I have indexed the codebase and AST symbol hierarchies. Ask anything regarding architecture, error handling, algorithms, or git commit history.</p>
+        </div>
+      </div>
+      <div class="quick-prompts">
+        <span style="font-size: 12px; font-weight: 600; color: var(--ink-soft);">Suggestions:</span>
+        <button class="quick-chip" onclick="askQuickPrompt('Explain the core architecture and key modules of this codebase.')">🔍 Explain Architecture</button>
+        <button class="quick-chip" onclick="askQuickPrompt('What are the main entrypoints and setup requirements?')">⚡ Main Entrypoints</button>
+        <button class="quick-chip" onclick="askQuickPrompt('Explain recent git commits and why changes were made.')">📜 Recent Commits</button>
+        <button class="quick-chip" onclick="askQuickPrompt('How does error handling and validation work across files?')">🛡️ Error Handling</button>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Ask about functions, classes, commits, or dependencies..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+        <button class="btn-primary" onclick="sendChatMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Project Overview & README -->
+  <div class="tab-panel" id="tab-overview">
+    <div class="overview-card">
+      <div class="overview-header">
+        <div style="font-size: 16px; font-weight: 700; color: var(--ink);">📖 Project Architecture & Documentation</div>
+        <button class="btn-secondary" onclick="streamOverview()">🤖 Regenerate AI Architectural Blueprint</button>
+      </div>
+      
+      <div class="notice-banner" id="readme-notice" style="display:none;">
+        <b>💡 Autonomous Architecture Blueprint (No README Detected):</b>
+        No <code>README.md</code> was found in this repository. RepoLens has autonomously analyzed the AST structures, module hierarchies, and configurations to generate the architectural blueprint below in real time.
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <div style="font-weight: 600; font-size: 14px; margin-bottom: 10px; color: var(--ink);">🤖 AI-Synthesized Codebase Architecture Blueprint:</div>
+        <div class="markdown-body" id="overview-content" style="background:#F8F9FA; border:1px solid var(--line); border-radius:var(--radius); padding:20px;">
+          <p style="color:var(--ink-soft); font-style:italic;">Click "Regenerate AI Architectural Blueprint" or ingest a repository to stream an architectural analysis...</p>
+        </div>
+      </div>
+
+      <div id="original-readme-section" style="display:none;">
+        <div style="font-weight: 600; font-size: 14px; margin-bottom: 10px; color: var(--ink);">📄 Original Repository <code id="readme-filename">README.md</code>:</div>
+        <div class="markdown-body" id="original-readme-content" style="border:1px solid var(--line); border-radius:var(--radius); padding:20px; background:#FFFFFF;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: Codebase Explorer -->
+  <div class="tab-panel" id="tab-explorer">
+    <div class="explorer-layout">
+      <div class="explorer-sidebar">
+        <input type="text" id="file-search-input" placeholder="Filter files (e.g. .py, agent, test)..." oninput="filterFiles()">
+        <div class="explorer-filelist" id="explorer-files"></div>
+      </div>
+      <div class="explorer-viewer">
+        <div class="viewer-header">
+          <div>
+            <span style="font-weight: 700; font-family:'IBM Plex Mono', monospace;" id="viewer-file-path">Select a file</span>
+            <span style="font-size: 12px; color: var(--ink-soft); margin-left: 10px;" id="viewer-file-meta"></span>
+          </div>
+        </div>
+        
+        <!-- In-Place File Copilot -->
+        <div class="copilot-bar">
+          <div style="font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 8px;">🤖 In-Place Vector RAG File Copilot:</div>
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <button class="btn-secondary" onclick="askFileCopilot('Explain the purpose, main functions, and architecture of this file.')">🔍 Explain File</button>
+            <button class="btn-secondary" onclick="askFileCopilot('Review this file for potential bugs, security concerns, or code smells.')">🛡️ Review Bugs</button>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="file-custom-q" placeholder="Custom question about this file (e.g. How does method X work?)...">
+            <button class="btn-secondary" onclick="askFileCustomQuestion()">Ask</button>
+          </div>
+          <div class="copilot-response-box" id="file-copilot-output"></div>
+        </div>
+
+        <!-- Code Content -->
+        <div id="viewer-content">
+          <p style="color:var(--ink-soft); font-style:italic;">Select a file from the sidebar to inspect its source code.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: Git Evolution & Diff Studio -->
+  <div class="tab-panel" id="tab-git">
+    <div class="git-layout">
+      <div class="git-sidebar" id="git-commit-list"></div>
+      <div class="git-viewer" id="git-commit-detail">
+        <p style="color:var(--ink-soft); font-style:italic;">Select a commit on the left to inspect full commit details, AI explanations, and syntax-highlighted diffs.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let repoStats = null;
+  let currentFile = null;
+  let selectedCommitIdx = 0;
+
+  const LANG_COLORS = {
+    "Python": "#3572A5",
+    "Jupyter Notebook": "#DA5B0B",
+    "JavaScript": "#F1E05A",
+    "TypeScript": "#3178C6",
+    "HTML": "#E34C26",
+    "CSS": "#563D7C",
+    "Markdown": "#083FA1",
+    "TOML": "#9C4221",
+    "YAML": "#CB171E",
+    "JSON": "#292929",
+    "Shell": "#89E051",
+    "Java": "#B07219",
+    "Other": "#64748B"
+  };
+
+  const FILE_ICONS = {
+    ".py": "🐍",
+    ".ipynb": "📓",
+    ".html": "🌐",
+    ".js": "📜",
+    ".ts": "🔷",
+    ".md": "📄",
+    ".toml": "⚙️",
+    ".json": "📦",
+    ".yaml": "⚙️",
+    ".yml": "⚙️",
+    ".png": "🖼️",
+    ".jpg": "🖼️"
+  };
+
+  function toggleBanner() {
+    const banner = document.getElementById("banner-content");
+    const icon = document.getElementById("banner-toggle-icon");
+    if (banner.style.display === "none") {
+      banner.style.display = "block";
+      icon.textContent = "▲ Collapse";
+    } else {
+      banner.style.display = "none";
+      icon.textContent = "▼ Expand";
+    }
+  }
+
+  function setRepoInput(val) {
+    document.getElementById("repo-url-input").value = val;
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    event.currentTarget.classList.add("active");
+    document.getElementById(tabId).classList.add("active");
+  }
+
+  async function loadRepositoryStats() {
+    try {
+      const res = await fetch("/api/stats");
+      if (!res.ok) return;
+      repoStats = await res.json();
+      renderStats();
+    } catch (e) {
+      console.error("Could not fetch stats:", e);
+    }
+  }
+
+  function renderStats() {
+    if (!repoStats) return;
+    document.getElementById("stat-files").textContent = repoStats.total_files || 0;
+    document.getElementById("stat-commits").textContent = repoStats.total_commits || 0;
+    document.getElementById("stat-lang").textContent = repoStats.primary_language || "N/A";
+    document.getElementById("stat-lines").textContent = (repoStats.total_lines || 0).toLocaleString();
+
+    // Render language bar
+    const progressEl = document.getElementById("lang-progress-bar");
+    const legendEl = document.getElementById("lang-legend");
+    progressEl.innerHTML = "";
+    legendEl.innerHTML = "";
+
+    const langs = repoStats.languages || {};
+    for (const [lang, pct] of Object.entries(langs)) {
+      const color = LANG_COLORS[lang] || "#64748B";
+      progressEl.innerHTML += `<div style="width:${pct}%; background:${color}; height:100%;" title="${lang}: ${pct}%"></div>`;
+      legendEl.innerHTML += `
+        <div class="lang-item">
+          <span class="lang-dot" style="background:${color};"></span>
+          <b>${lang}</b> <span style="color:var(--ink-soft);">${pct}%</span>
+        </div>
+      `;
+    }
+
+    // Render file list
+    renderFileList(repoStats.files || []);
+
+    // Render commits
+    renderCommitList(repoStats.commits || []);
+
+    // Render Overview & README
+    if (!repoStats.has_readme) {
+      document.getElementById("readme-notice").style.display = "block";
+      document.getElementById("original-readme-section").style.display = "none";
+      // Auto stream overview if empty
+      const ov = document.getElementById("overview-content").innerText.trim();
+      if (ov.includes("Click \"Regenerate")) {
+        streamOverview();
+      }
+    } else {
+      document.getElementById("readme-notice").style.display = "none";
+      document.getElementById("original-readme-section").style.display = "block";
+      document.getElementById("readme-filename").textContent = repoStats.readme_name || "README.md";
+      document.getElementById("original-readme-content").innerHTML = marked.parse(repoStats.readme_content || "");
+    }
+  }
+
+  function renderFileList(files) {
+    const listEl = document.getElementById("explorer-files");
+    listEl.innerHTML = "";
+    files.forEach((f, idx) => {
+      const icon = FILE_ICONS[f.ext] || "📄";
+      const div = document.createElement("div");
+      div.className = `file-item ${idx === 0 ? "active" : ""}`;
+      div.innerHTML = `<span>${icon} ${f.path}</span><span style="font-size:11px; color:var(--ink-muted);">${f.size_kb}KB</span>`;
+      div.onclick = () => selectFile(f.path, div);
+      listEl.appendChild(div);
+    });
+
+    if (files.length > 0 && !currentFile) {
+      selectFile(files[0].path, listEl.children[0]);
+    }
+  }
+
+  function filterFiles() {
+    const q = document.getElementById("file-search-input").value.toLowerCase();
+    const files = (repoStats?.files || []).filter(f => f.path.toLowerCase().includes(q));
+    renderFileList(files);
+  }
+
+  async function selectFile(filePath, el) {
+    currentFile = filePath;
+    document.querySelectorAll(".file-item").forEach(item => item.classList.remove("active"));
+    if (el) el.classList.add("active");
+
+    document.getElementById("viewer-file-path").textContent = filePath;
+    document.getElementById("file-copilot-output").style.display = "none";
+
+    try {
+      const res = await fetch(`/api/file?path=${encodeURIComponent(filePath)}`);
+      const data = await res.json();
+      
+      document.getElementById("viewer-file-meta").textContent = `${data.lang || ''} • ${data.lines || 0} lines • ${data.size_kb} KB`;
+      const viewer = document.getElementById("viewer-content");
+
+      if (data.is_image) {
+        viewer.innerHTML = `<img src="/static/${filePath}" style="max-width:100%; border-radius:4px;" alt="${filePath}">`;
+      } else if (data.ext === ".ipynb" && data.rendered_md) {
+        viewer.innerHTML = `<div class="markdown-body">${marked.parse(data.rendered_md)}</div>`;
+      } else if (data.ext === ".md") {
+        viewer.innerHTML = `<div class="markdown-body">${marked.parse(data.content)}</div>`;
+      } else {
+        const escaped = data.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        viewer.innerHTML = `<pre style="background:#FFFFFF; border:1px solid var(--line); padding:12px; border-radius:4px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; overflow-x:auto;"><code>${escaped}</code></pre>`;
+      }
+    } catch (e) {
+      console.error("Error loading file:", e);
+    }
+  }
+
+  async function askFileCopilot(query) {
+    if (!currentFile) return;
+    const out = document.getElementById("file-copilot-output");
+    out.style.display = "block";
+    out.innerHTML = `<div style="font-weight:600; margin-bottom:4px; color:#0369A1;">🤖 AI Analysis for <code>${currentFile}</code>:</div><div id="file-copilot-stream-text"><i>Thinking...</i></div>`;
+
+    const streamEl = document.getElementById("file-copilot-stream-text");
+    try {
+      const res = await fetch("/api/stream/file-copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_path: currentFile, query: query })
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      streamEl.innerHTML = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+        streamEl.innerHTML = marked.parse(fullText);
+      }
+    } catch (e) {
+      streamEl.innerHTML = `<span style="color:var(--accent-red);">Error: ${e.message}</span>`;
+    }
+  }
+
+  function askFileCustomQuestion() {
+    const q = document.getElementById("file-custom-q").value;
+    if (q) askFileCopilot(q);
+  }
+
+  function renderCommitList(commits) {
+    const listEl = document.getElementById("git-commit-list");
+    listEl.innerHTML = "";
+    commits.forEach((c, idx) => {
+      const div = document.createElement("div");
+      div.className = `commit-card ${idx === selectedCommitIdx ? "active" : ""}`;
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span class="commit-sha-badge">${c.sha}</span>
+          <span style="font-size:11.5px; color:var(--ink-soft);">${c.date}</span>
+        </div>
+        <div style="font-size:13px; font-weight:600; color:var(--ink); margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+          ${c.message}
+        </div>
+        <div style="font-size:11.5px; color:var(--ink-soft); display:flex; justify-content:space-between;">
+          <span>👤 ${c.author}</span>
+          <span><span class="stat-add">+${c.total_insertions}</span> / <span class="stat-del">-${c.total_deletions}</span></span>
+        </div>
+      `;
+      div.onclick = () => selectCommit(idx, div);
+      listEl.appendChild(div);
+    });
+
+    if (commits.length > 0) {
+      selectCommit(0, listEl.children[0]);
+    }
+  }
+
+  function selectCommit(idx, el) {
+    selectedCommitIdx = idx;
+    document.querySelectorAll(".commit-card").forEach(c => c.classList.remove("active"));
+    if (el) el.classList.add("active");
+
+    const commit = (repoStats?.commits || [])[idx];
+    if (!commit) return;
+
+    const detailEl = document.getElementById("git-commit-detail");
+    let diffsHtml = "";
+    (commit.diffs || []).forEach((d, dIdx) => {
+      const escaped = (d.patch || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      diffsHtml += `
+        <div class="diff-block">
+          <div class="diff-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+            <span>📄 <b>${d.file}</b> (${d.change_type})</span>
+            <span>▼ Toggle Diff</span>
+          </div>
+          <div class="diff-body" style="display:${dIdx === 0 ? 'block' : 'none'};">
+            <pre><code>${escaped}</code></pre>
+          </div>
+        </div>
+      `;
+    });
+
+    detailEl.innerHTML = `
+      <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:var(--radius); padding:16px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:700; color:var(--accent-blue);">🏷️ Commit ${commit.sha}</span>
+          <span style="font-size:12px; color:var(--ink-soft);">${commit.date}</span>
+        </div>
+        <div style="font-size:14.5px; font-weight:600; margin-bottom:10px;">${commit.message}</div>
+        <div style="font-size:12.5px; color:var(--ink-soft); display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px;">
+          <span>👤 <b>Author:</b> ${commit.author} &lt;${commit.email}&gt;</span>
+          <span><span class="stat-add">+${commit.total_insertions}</span> / <span class="stat-del">-${commit.total_deletions}</span> lines</span>
+          <span style="font-family:'IBM Plex Mono', monospace;">SHA: ${commit.full_sha}</span>
+        </div>
+        <button class="btn-primary" onclick="streamCommitCopilot('${commit.sha}')">🤖 AI: Explain This Commit</button>
+      </div>
+      <div id="commit-copilot-box" class="copilot-response-box" style="margin-bottom:16px;"></div>
+      <div style="font-size:14px; font-weight:600; margin-bottom:10px;">📂 Modified Files & Diffs (${(commit.diffs || []).length}):</div>
+      <div>${diffsHtml || '<p style="color:var(--ink-soft);">Root commit or merge commit without diff.</p>'}</div>
+    `;
+  }
+
+  async function streamCommitCopilot(sha) {
+    const box = document.getElementById("commit-copilot-box");
+    box.style.display = "block";
+    box.innerHTML = `<div style="font-weight:600; margin-bottom:4px; color:#0369A1;">🤖 AI Analysis for Commit <code>${sha}</code>:</div><div id="commit-stream-text"><i>Thinking...</i></div>`;
+    const streamEl = document.getElementById("commit-stream-text");
+
+    try {
+      const res = await fetch("/api/stream/commit-copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commit_sha: sha })
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      streamEl.innerHTML = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+        streamEl.innerHTML = marked.parse(fullText);
+      }
+    } catch (e) {
+      streamEl.innerHTML = `<span style="color:var(--accent-red);">Error: ${e.message}</span>`;
+    }
+  }
+
+  async function streamOverview() {
+    const ov = document.getElementById("overview-content");
+    ov.innerHTML = "<p><i>⚡ Streaming Real-Time AI Architectural Synthesis...</i></p>";
+
+    try {
+      const res = await fetch("/api/stream/overview", { method: "POST" });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      ov.innerHTML = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+        ov.innerHTML = marked.parse(fullText);
+      }
+    } catch (e) {
+      ov.innerHTML = `<span style="color:var(--accent-red);">Failed to generate overview: ${e.message}</span>`;
+    }
+  }
+
+  async function sendChatMessage() {
+    const input = document.getElementById("chat-input");
+    const query = input.value.trim();
+    if (!query) return;
+    input.value = "";
+
+    const msgList = document.getElementById("chat-msg-list");
+    msgList.innerHTML += `<div class="chat-bubble user">${query}</div>`;
+
+    const botBubble = document.createElement("div");
+    botBubble.className = "chat-bubble assistant";
+    botBubble.innerHTML = `<div><i>Thinking...</i></div>`;
+    msgList.appendChild(botBubble);
+    msgList.scrollTop = msgList.scrollHeight;
+
+    try {
+      const res = await fetch("/api/stream/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query })
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      let citations = [];
+
+      botBubble.innerHTML = `<div id="cur-stream"></div><div class="chat-citations" id="cur-cits" style="display:none;"></div>`;
+      const curStream = botBubble.querySelector("#cur-stream");
+      const curCits = botBubble.querySelector("#cur-cits");
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        let chunk = decoder.decode(value, { stream: true });
+
+        // Parse citation metadata line if present
+        if (chunk.includes("__CITATIONS__")) {
+          const match = chunk.match(/__CITATIONS__(.*?)__END_CITATIONS__\n?/);
+          if (match) {
+            try {
+              const meta = JSON.parse(match[1]);
+              citations = meta.citations || [];
+            } catch(err) {}
+            chunk = chunk.replace(/__CITATIONS__(.*?)__END_CITATIONS__\n?/, "");
+          }
+        }
+
+        fullText += chunk;
+        curStream.innerHTML = marked.parse(fullText);
+        msgList.scrollTop = msgList.scrollHeight;
+      }
+
+      if (citations.length > 0) {
+        curCits.style.display = "flex";
+        curCits.innerHTML = "<b>Citations:</b> " + citations.map(c => `<span class="cit-badge">${c}</span>`).join("");
+      }
+    } catch (e) {
+      botBubble.innerHTML = `<span style="color:var(--accent-red);">Error: ${e.message}</span>`;
+    }
+  }
+
+  function askQuickPrompt(q) {
+    document.getElementById("chat-input").value = q;
+    sendChatMessage();
+  }
+
+  async function ingestRepository() {
+    const url = document.getElementById("repo-url-input").value.trim();
+    if (!url) return;
+
+    const spinner = document.getElementById("ingest-spinner");
+    const status = document.getElementById("ingest-status");
+    const btn = document.getElementById("btn-ingest");
+
+    spinner.style.display = "inline-block";
+    btn.disabled = true;
+    status.style.display = "flex";
+    status.textContent = `Cloning & indexing ${url}...`;
+
+    try {
+      const res = await fetch("/api/ingest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ repo_source: url, force_reindex: true })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        status.style.color = "var(--accent-green)";
+        status.textContent = `✅ ${data.message || "Ingested successfully!"}`;
+        await loadRepositoryStats();
+      } else {
+        status.style.color = "var(--accent-red)";
+        status.textContent = `❌ Ingestion failed: ${data.detail || "Error"}`;
+      }
+    } catch (e) {
+      status.style.color = "var(--accent-red)";
+      status.textContent = `❌ Request failed: ${e.message}`;
+    } finally {
+      spinner.style.display = "none";
+      btn.disabled = false;
+    }
+  }
+
+  // Initial load
+  loadRepositoryStats();
+</script>
+
+</body>
+</html>
