@@ -234,7 +234,7 @@ GROQ_API_KEY=gsk_your_groq_api_key_here
 PRIMARY_LLM_MODEL=openai/gpt-oss-120b
 FAST_ROUTER_MODEL=openai/gpt-oss-20b
 DEFAULT_EMBEDDING_MODEL=all-MiniLM-L6-v2
-POSTGRES_URL=postgresql://postgres:soham@localhost:5432/postgres
+POSTGRES_URL=postgresql://postgres:your_password@localhost:5432/repolens_db
 ```
 
 ### 3. Launch Web Application

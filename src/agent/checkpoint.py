@@ -30,7 +30,7 @@ def get_postgres_checkpointer(conn_string: Optional[str] = None):
     import socket
     from urllib.parse import urlparse
 
-    conn_str = conn_string or os.getenv("POSTGRES_URL", "postgresql://postgres:soham@localhost:5442/postgres")
+    conn_str = conn_string or os.getenv("POSTGRES_URL", "postgresql://postgres:postgres@localhost:5432/repolens_db")
     try:
         # Fast socket probe (1 second max) to prevent blocking if Docker is down
         parsed = urlparse(conn_str)
